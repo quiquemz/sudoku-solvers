@@ -5,11 +5,11 @@ Important: Your commits should be using the Github Classroom link (in a private 
 
 Due date
 -----
-March 18 (Sunday) 11:59pm Pacific Time. Extra credits for earlier submission (see below). 
+March-18 (Sunday) 11:59pm Pacific Time. Extra credits for earlier submission (see below). 
 
 Tasks
 -----
-Regular Commits (1 point): At least one nontrivial commit by Feb-28 11:59pm. 
+Regular Commits (1 point): At least one nontrivial commit by March-14 11:59pm. 
 
 Documentation (1 point): Comment your code generously. 
 
@@ -46,7 +46,6 @@ Extra Credits
 - (3 Points) Check performance on more benchmarks (these [easy ones](http://norvig.com/easy50.txt) and these [hard ones](http://norvig.com/top95.txt)). Produce a plot that shows the the performance difference of the three approaches (with a timeout of 5 minutes or something on the naive algorithm). 
 
 - (5 Points) If you have even more time and interest, scale everything to 16 by 16 problems (right now it is 9 by 9), and generate some problems. Check how the three appraoches differ in performance. 
-
 
 Extension Policy
 -----
