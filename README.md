@@ -45,7 +45,7 @@ Extra Credits
 
 - (3 Points) Check performance on more benchmarks (these [easy ones](http://norvig.com/easy50.txt) and these [hard ones](http://norvig.com/top95.txt)). Produce a plot that shows the the performance difference of the three approaches (with a timeout of 5 minutes or something on the naive algorithm). 
 
-- (5 Points) If you have even more time and interest, scale everything to 16 by 16 problems (and generate some problems). Check how the three appraoches differ in performance. 
+- (5 Points) If you have even more time and interest, scale everything to 16 by 16 problems (right now it is 9 by 9), and generate some problems. Check how the three appraoches differ in performance. 
 
 
 Extension Policy
