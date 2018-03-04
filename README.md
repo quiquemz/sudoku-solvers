@@ -41,7 +41,7 @@ If you want to know about more solvers, check the [page](http://www.satcompetiti
 
 Extra Credits
 -----
-- (2 Points) If your last commit is pushed by March-14 11:59pm, with no significant bug, then you will earn 3 extra points. Note that you can decide to just finish one or two parts of the assignment (like just aiming for 8 or 16 points), and still get the extra points added if you finish them early.  
+- (2 Points) If your last commit is pushed by March-14 11:59pm, with no significant bug, then you will earn 2 extra points. Note that you can decide to just finish one or two parts of the assignment (like just aiming for 8 or 16 points), and still get the extra points added if you finish them early.  
 
 - (3 Points) Check performance on more benchmarks (these [easy ones](http://norvig.com/easy50.txt) and these [hard ones](http://norvig.com/top95.txt)). Produce a plot that shows the the performance difference of the three approaches (with a timeout of 5 minutes or something on the naive algorithm). 
 
