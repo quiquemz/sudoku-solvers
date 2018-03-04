@@ -7,7 +7,7 @@ Due date
 -----
 March-18 (Sunday) 11:59pm Pacific Time. Extra credits for earlier submission (see below). 
 
-Tasks
+Tasks (26 points)
 -----
 Regular Commits (1 point): At least one nontrivial commit by March-14 11:59pm. 
 
@@ -39,7 +39,7 @@ I highly recommend that you find a linux/mac machine to use the solver. If you h
 If you want to know about more solvers, check the [page](http://www.satcompetition.org/) for the annual SAT solver competition. 
 
 
-Extra Credits
+Extra Credits (up to 10 points)
 -----
 - (2 Points) If your last commit is pushed by March-14 11:59pm, with no significant bug, then you will earn 2 extra points. Note that you can decide to just finish one or two parts of the assignment (like just aiming for 8 or 16 points), and still get the extra points added if you finish them early.  
 
