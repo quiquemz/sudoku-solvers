@@ -19,7 +19,7 @@ Task 1 (8 points): Naive Constraint Solving
 
 The naive algorithm should solve the easy puzzles quickly. It can take several minutes to solve the hard ones this way. 
 
-Task 2 (8 points): Use More Pruning
+Task 2 (6 points): Use More Pruning
 
 - Extend the code with more advanced solving techniques as explained in [this post](http://norvig.com/sudoku.html). Note that the techniques are closer to the set-based pruning that we discussed in class, tailored to solving Sudoku. Clearly, you can not just copy paste their code, but need to understand it and then adapt it without changing the data structure from the first task. 
 
@@ -27,11 +27,21 @@ The advanced algorithm should now solve the hard puzzles quickly.
 
 Task 3 (8 points): Translate to SAT to Solve
 
-- Implement an encoding of Sudoku as propositional logic formulas in conjunctive normal forms, and use a state-of-the-art SAT solver to solve. (TODO: more details on the rules)
+- Implement an encoding of Sudoku as propositional logic formulas in conjunctive normal forms, and use a state-of-the-art SAT solver to solve. Read the `notes.pdf` file for more details. The `hard1.cnf` file in the `cnf` directory is the encoding of the first hard instance in the code. You need to generate the CNF files, pass them to a SAT solver (see below) to solve, and then parse the output from the SAT solver and plug them back into the original problem and display the solutions. 
+
+SAT Solvers to Use
+-----
+
+I recommend [PicoSAT](http://fmv.jku.at/picosat/) as the default choice. Go to its webpage, download, and compile (simply do `./configure.sh` and then `make`). The binary `picosat` can then take the CNF files you produce (always use extension `.cnf`). 
+
+I highly recommend that you find a linux/mac machine to use the solver. If you have to use windows, this [note](https://gist.github.com/ConstantineLignos/4601835) may be helpful but I haven't tried. If you have difficulty in getting PicoSAT to work, try [cryptominisat](https://github.com/msoos/cryptominisat) which has more instructions about making things work on windows. 
+
+If you want to know about more solvers, check the [page](http://www.satcompetition.org/) for the annual SAT solver competition. 
+
 
 Extra Credits
 -----
-If your last commit is pushed by March-14 11:59pm, with no significant bug, then you will earn 3 extra points. 
+If your last commit is pushed by March-14 11:59pm, with no significant bug, then you will earn 3 extra points. Note that you can decide to just finish one or two parts of the assignment (like just aiming for 8 or 16 points), and still get the extra points added if you finish them early.  
 
 Extension Policy
 -----
