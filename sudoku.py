@@ -1,3 +1,8 @@
+'''
+The code for Solver2 was highly inspired by Peter Norvig's implementation:
+http://norvig.com/sudoku.html
+'''
+
 from __future__ import print_function
 import random
 import copy
@@ -121,93 +126,86 @@ class Solver2:
 
     @time_deco
     def solve(self):
-        # Assigning given information (grids) to sigma
-        # self.add_to_sigma(self.sigma, {}, {})
+        domains = self.initial_assignment()
+        if not domains:
+            return False
 
-        result = self.search(self.sigma)
-        return result
+        return self.assign_to_sigma(self.sigma, self.search(domains))
 
-    def add_to_sigma(self, sigma, assignments, removed_vals):
-        for s in self.grid.spots:
-            if len(self.grid.domains[s]) == 1:
-                if not self.sigma.get(s):
-                    self.sigma[s] = self.grid.domains[s][0]
-                    self.add_to(assignments, s, self.grid.domains[s][0])
-                    self.remove_from_peers(
-                        self.grid.domains[s][0], self.grid.peers[s], removed_vals)
+    def search(self, values):
+        if values is False:
+            return False
 
-    def remove_from_peers(self, d, peers, removed_vals):
-        for peer in peers:
-            if d in self.grid.domains[peer]:
-                self.grid.domains[peer].remove(d)
-                self.add_to(removed_vals, peer, d)
+        if all([len(values[s]) == 1 for s in self.grid.spots]):
+            return values
 
-    def assign(self, sigma, s, d, assignments, removed_vals):
-        other_values = [x for x in self.grid.domains[s] if x != d]
-        if all(self.eliminate(sigma, s, d2, assignments, removed_vals) for d2 in other_values):
-            self.add_to_sigma(sigma, assignments, removed_vals)
-            return True
+        _, s = min((len(values[s]), s) for s in self.grid.spots if len(values[s]) > 1)
+        return self.some(self.search(self.assign(copy.deepcopy(values), s, d))
+                         for d in values[s])
+
+    def some(self, seq):
+        "Return some element of seq that is true."
+        for e in seq:
+            if e:
+                return e
+        return False
+
+    def assign(self, values, s, d):
+        """Eliminate all the other values (except d) from values[s] and propagate.
+        Return values, except return False if a contradiction is detected."""
+
+        other_values = [v for v in values[s] if v != d]
+
+        if all(self.eliminate(values, s, d2) for d2 in other_values):
+            return values
         else:
             return False
 
-    def eliminate(self, sigma, s, d, assignments, removed_vals):
-        if d not in self.grid.domains[s]:
-            return True
+    def eliminate(self, values, s, d):
+        # print('Eliminating {} from {}'.format(d, values[s]))
+        """Eliminate d from values[s]; propagate when values or places <= 2.
+        Return values, except return False if a contradiction is detected."""
+        if d not in values[s]:
+            return values  # Already eliminated
 
-        self.grid.domains[s].remove(d)
-        self.add_to(removed_vals, s, d)
+        values[s].remove(d)
 
-        if len(self.grid.domains[s]) == 0:
-            return False  # Contradiction: removed last d
-        elif len(self.grid.domains[s]) == 1:
-            d2 = self.grid.domains[s][0]
-            if not all(self.eliminate(sigma, peer, d2, assignments, removed_vals) for peer in self.grid.peers[s]):
-
+        # (1) If a square s is reduced to one value d2, then eliminate d2 from the peers.
+        if len(values[s]) == 0:
+            return False  # Contradiction: removed last value
+        elif len(values[s]) == 1:
+            d2 = values[s][0]
+            if not all(self.eliminate(values, s2, d2) for s2 in self.grid.peers[s]):
                 return False
 
+        # (2) If a unit u is reduced to only one place for a value d, then put it there.
         for u in self.grid.units[s]:
-            value_spots = [s for s in u if d in self.grid.domains[s]]
-            if len(value_spots) == 0:
-                return False
-            elif len(value_spots) == 1:
-                if not self.assign(sigma, value_spots[0], d, assignments, removed_vals):
+            dplaces = [s for s in u if d in values[s]]
+            if len(dplaces) == 0:
+                return False  # Contradiction: no place for this value
+            elif len(dplaces) == 1:
+                if not self.assign(values, dplaces[0], d):
                     return False
 
-        return True
+        return values
 
-    def rollback(self, sigma, assignments, removed_vals):
-        for s, d in assignments.iteritems():
-            del sigma[s]
+    def assign_to_sigma(self, sigma, domains):
+        if not domains:
+            return False
 
-        for s, values in removed_vals.iteritems():
-            for d in values:
-                assert d not in self.grid.domains[s]
-                self.grid.domains[s].append(d)
+        for spot in self.grid.spots:
+            sigma[spot] = domains[spot][0]
 
-    def search(self, sigma):
-        if len(sigma) == len(self.grid.spots):
-            return True
+        return sigma
 
-        s = self.select_unassigned_spot()
-        for d in self.grid.domains[s]:
-            assignments = {}
-            removed_vals = {}
-            if self.consistent(sigma, s, d):
-                if self.assign(sigma, s, d, assignments, removed_vals):
-                    # If not, check if needed to add mannually
-                    assert all([sigma.get(s) for s in assignments])
-                    if self.search(sigma):
-                        return True
-                self.rollback(sigma, assignments, removed_vals)
-
-        return False
-
-    ##### OTHERS #####
-    def add_to(self, dictionary, s, d):
-        if dictionary.get(s):
-            dictionary[s].add(d)
-        else:
-            dictionary[s] = set([d])
+    def initial_assignment(self):
+        for s in self.grid.spots:
+            if len(self.grid.domains[s]) == 1:
+                d = self.grid.domains[s][0]
+                self.grid.domains[s] = range(1, 10)
+                if not self.assign(self.grid.domains, s, d):
+                    return False
+        return self.grid.domains
 
     def consistent(self, sigma, spot, value):
         for peer in self.grid.peers[spot]:
@@ -215,12 +213,6 @@ class Solver2:
                 return False
         return True
 
-    def select_unassigned_spot(self):
-        # return min([s for s in self.grid.spots if len(self.grid.domains[s]) > 1])
-
-        for spot in self.grid.spots:
-            if not self.sigma.get(spot):
-                return spot
 
 ###### ---------- MAIN ---------- ######
 
@@ -244,7 +236,7 @@ hard = ["4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2....
         "52...6.........7.13...........4..8..6......5...........418.........3..2...87....."]
 
 print("====Problem====")
-g = Grid(hard[0])
+g = Grid(hard[1])
 # Display the original problem
 g.display()
 s = Solver2(g)
