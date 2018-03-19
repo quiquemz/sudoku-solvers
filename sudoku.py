@@ -43,7 +43,6 @@ def time_deco(f):
         t = time.time()
         try:
             result = f(*args)
-            print('test 2')
             t = time.time() - t
             print('\nExecution time: %s seconds\n' % str(t))
             return (t, result)
@@ -646,7 +645,7 @@ class Benchmark:
             t2, _ = solver2.solve()
             t3, _ = solver3.solve()
 
-            # self.times[dif + str(size) + str(1)].append(int(t1 * 1000))
+            self.times[dif + str(size) + str(1)].append(int(t1 * 1000))
             self.times[dif + str(size) + str(2)].append(int(t2 * 1000))
             self.times[dif + str(size) + str(3)].append(int(t3 * 1000))
 
@@ -658,14 +657,15 @@ class Benchmark:
         t3 = self.times[dif + str(size) + '3']
 
         ind = np.arange(len(t2))  # the x locations for the groups
-        width = 0.5  # the width of the bars
+        width = 0.2  # the width of the bars
 
         fig, ax = plt.subplots()
-        rects1 = ax.bar(ind - width / 2, t2, width,
+
+        rects1 = ax.bar(ind - width, t1, width,
                         color='b', label='Solver 1')
-        rects2 = ax.bar(ind - width / 2, t2, width,
+        rects2 = ax.bar(ind, t2, width,
                         color='r', label='Solver 2')
-        rects3 = ax.bar(ind + width / 2, t3, width,
+        rects3 = ax.bar(ind + width, t3, width,
                         color='g', label='Solver 3')
 
         # Add some text for labels, title and custom x-axis tick labels, etc.
@@ -683,21 +683,24 @@ class Benchmark:
         self.plot('hard', 16)
 
 
-''' Use Benchamrk().plot_all() to see the graphs.'''
-#Benchmark().plot('easy', 9)
-# Benchmark().plot_all()
+''' Use Benchamrk().plot_all() to see all the graphs.'''
+Benchmark().plot_all()
+
+''' Use Benchamrk().plot([dificulty], [size]) to see specific graph.'''
+# Benchmark().plot('easy', 9)
+
 
 ''' Use Sudoku().main() to solve all problems using a specific solver'''
 # Sudoku(9).main(Solver)  # You wouldn't want to do this!!
 # Sudoku(9).main(Solver) # It would take FOREVER
 
-# Sudoku(9).main(Solver2)
-# Sudoku(16).main(Solver2)
-#
-# Sudoku(9).main(Solver3)
-# Sudoku(16).main(Solver3)
+Sudoku(9).main(Solver2)
+Sudoku(16).main(Solver2)
+
+Sudoku(9).main(Solver3)
+Sudoku(16).main(Solver3)
 
 ''' Use Sudoku().solve([solver], [problem], [filename]) to solve one problem.'''
-Sudoku(9).solve(Solver, Sudoku(9).easy[1], 'test')
+# Sudoku(9).solve(Solver, Sudoku(9).easy[1], 'test')
 # Sudoku(9).solve(Solver2, Sudoku(9).easy[1], 'test')
 # Sudoku(9).solve(Solver3, Sudoku(9).easy[1], 'test')
