@@ -8,6 +8,8 @@ import random
 import copy
 import time
 import pycosat
+import numpy as np
+import matplotlib.pyplot as plt
 from math import sqrt
 from subprocess import Popen, PIPE
 
@@ -16,12 +18,37 @@ MAP = {1: '1', 2: '2', 3: '3', 4: '4', 5: '5', 6: '6', 7: '7', 8: '8', 9: '9',
        10: 'A', 11: 'B', 12: 'C', 13: 'D', 14: 'E', 15: 'F', 16: 'G'}
 
 
+class TimedOutExc(Exception):
+    pass
+
+
+def deadline(timeout, *args):
+    def decorate(f):
+        def handler(signum, frame):
+            raise TimedOutExc()
+
+        def new_f(*args):
+            signal.signal(signal.SIGALRM, handler)
+            signal.alarm(timeout)
+            return f(*args)
+            signa.alarm(0)
+        new_f.__name__ = f.__name__
+        return new_f
+    return decorate
+
+
 def time_deco(f):
     def decorated(*args):
         t = time.time()
-        result = f(*args)
-        print('\nExecution time: %s seconds\n' % str(time.time() - t))
-        return result
+        try:
+            result = f(*args)
+            t = time.time() - t
+            print('\nExecution time: %s seconds\n' % str(t))
+            return (t, result)
+
+        except:
+            print('EXCEEDED LIMIT: 5 MINS')
+            return(5., result)
     return decorated
 
 
@@ -102,6 +129,7 @@ class Solver:
         self.sigma = {}
 
     @time_deco
+    @deadline(300)
     def solve(self):
         # Filling given information (grids)
         for spot in self.grid.spots:
@@ -519,7 +547,7 @@ class Sudoku:
         if difficulty == 'hard' or difficulty == 'all':
             for i, p in enumerate(self.hard):
                 print('             HARD PROBLEM {}'.format(str(i)))
-                self.solve(solver, p, 'hard{}.cnf'.format(str(self.size), str(i)))
+                self.solve(solver, p, 'hard{}_{}.cnf'.format(str(self.size), str(i)))
 
     def solve(self, solver, problem, filename):
         print('\n****************************************')
@@ -530,7 +558,8 @@ class Sudoku:
         g = Grid(problem, self.size)
         g.display()
         s = solver(g, self.size, filename)
-        if s.solve():
+        solved = s.solve()
+        if solved[1]:
             if self.size == 9:
                 print("====Solution===")
             elif self.size == 16:
@@ -539,6 +568,8 @@ class Sudoku:
             self.display_solution(s.sigma)
         else:
             print("=======No solution=======")
+
+        return solved[0]
 
     def display_solution(self, d):
         for i in range(0, self.size):
@@ -562,15 +593,104 @@ class Sudoku:
         print('****************************************\n')
 
 
+class Benchmark:
+    def __init__(self):
+        self.easy9_solver1_times = []
+        self.easy9_solver2_times = []
+        self.easy9_solver3_times = []
+
+        self.hard9_solver1_times = []
+        self.hard9_solver2_times = []
+        self.hard9_solver3_times = []
+
+        self.easy16_solver1_times = []
+        self.easy16_solver2_times = []
+        self.easy16_solver3_times = []
+
+        self.hard16_solver1_times = []
+        self.hard16_solver2_times = []
+        self.hard16_solver3_times = []
+
+        self.times = {
+            'easy91': self.easy9_solver1_times,
+            'easy92': self.easy9_solver2_times,
+            'easy93': self.easy9_solver3_times,
+
+            'hard91': self.hard9_solver1_times,
+            'hard92': self.hard9_solver2_times,
+            'hard93': self.hard9_solver3_times,
+
+            'easy161': self.easy16_solver1_times,
+            'easy162': self.easy16_solver2_times,
+            'easy163': self.easy16_solver3_times,
+
+            'hard161': self.hard16_solver1_times,
+            'hard162': self.hard16_solver2_times,
+            'hard163': self.hard16_solver3_times
+        }
+
+    def time(self, dif='hard', size=9):
+        sudoku = Sudoku(size)
+
+        problem_set = sudoku.easy if dif != 'hard' else sudoku.hard
+
+        for i, p in enumerate(problem_set):
+            g = Grid(p, size)
+            solver1 = Solver(g, size, '')
+            solver2 = Solver2(g, size, '')
+            solver3 = Solver3(g, size, '{}{}_{}.cnf'.format(dif, str(size), str(i)))
+
+            t1, _ = solver1.solve()
+            t2, _ = solver2.solve()
+            t3, _ = solver3.solve()
+
+            # self.times[dif + str(size) + str(1)].append(int(t1 * 1000))
+            self.times[dif + str(size) + str(2)].append(int(t2 * 1000))
+            self.times[dif + str(size) + str(3)].append(int(t3 * 1000))
+
+    def plot(self, dif='hard', size=9):
+        self.time(dif, size)
+
+        #t1 = self.times[dif + str(size) + '1']
+        t2 = self.times[dif + str(size) + '2']
+        t3 = self.times[dif + str(size) + '3']
+
+        ind = np.arange(len(t2))  # the x locations for the groups
+        width = 0.5  # the width of the bars
+
+        fig, ax = plt.subplots()
+        rects1 = ax.bar(ind - width / 2, t2, width,
+                        color='SkyBlue', label='Solver 2')
+        rects2 = ax.bar(ind + width / 2, t3, width,
+                        color='IndianRed', label='Solver 3')
+
+        # Add some text for labels, title and custom x-axis tick labels, etc.
+        ax.set_ylabel('Time (miliseconds)')
+        ax.set_title('{} Problems {}'.format(dif.upper(), '{}X{}'.format(str(size), str(size))))
+        ax.legend()
+
+        plt.show()
+
+    def plot_all(self):
+        self.plot('easy', 9)
+        self.plot('hard', 9)
+
+        self.plot('easy', 16)
+        self.plot('hard', 16)
+
+
+#
+Benchmark().plot('easy', 9)
+
 ''' Use Sudoku().main() to solve all'''
 # Sudoku(9).main(Solver)  # You wouldn't want to do this!!
-# Sudoku(16).main(Solver) # It would take FOREVER
+# Sudoku(9).main(Solver) # It would take FOREVER
 
-Sudoku(9).main(Solver2)
-Sudoku(9).main(Solver2)
-
-Sudoku(16).main(Solver3)
-Sudoku(16).main(Solver3)
+# Sudoku(9).main(Solver2)
+# Sudoku(16).main(Solver2)
+#
+# Sudoku(9).main(Solver3)
+# Sudoku(16).main(Solver3)
 
 # Sudoku(9).solve(Solver, Sudoku(9).easy[1], 'test')
 # Sudoku(9).solve(Solver2, Sudoku(9).easy[1], 'test')
