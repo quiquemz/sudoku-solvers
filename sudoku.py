@@ -8,6 +8,7 @@ import random
 import copy
 import time
 import pycosat
+import signal
 import numpy as np
 import matplotlib.pyplot as plt
 from math import sqrt
@@ -42,13 +43,14 @@ def time_deco(f):
         t = time.time()
         try:
             result = f(*args)
+            print('test 2')
             t = time.time() - t
             print('\nExecution time: %s seconds\n' % str(t))
             return (t, result)
 
         except:
-            print('EXCEEDED LIMIT: 5 MINS')
-            return(5., result)
+            print('\nEXCEEDED LIMIT: 5 MINS\n')
+            return(5., False)
     return decorated
 
 
@@ -128,8 +130,8 @@ class Solver:
         self.grid = grid
         self.sigma = {}
 
-    @time_deco
     @deadline(300)
+    @time_deco
     def solve(self):
         # Filling given information (grids)
         for spot in self.grid.spots:
@@ -651,7 +653,7 @@ class Benchmark:
     def plot(self, dif='hard', size=9):
         self.time(dif, size)
 
-        #t1 = self.times[dif + str(size) + '1']
+        t1 = self.times[dif + str(size) + '1']
         t2 = self.times[dif + str(size) + '2']
         t3 = self.times[dif + str(size) + '3']
 
@@ -660,9 +662,11 @@ class Benchmark:
 
         fig, ax = plt.subplots()
         rects1 = ax.bar(ind - width / 2, t2, width,
-                        color='SkyBlue', label='Solver 2')
-        rects2 = ax.bar(ind + width / 2, t3, width,
-                        color='IndianRed', label='Solver 3')
+                        color='b', label='Solver 1')
+        rects2 = ax.bar(ind - width / 2, t2, width,
+                        color='r', label='Solver 2')
+        rects3 = ax.bar(ind + width / 2, t3, width,
+                        color='g', label='Solver 3')
 
         # Add some text for labels, title and custom x-axis tick labels, etc.
         ax.set_ylabel('Time (miliseconds)')
@@ -679,10 +683,11 @@ class Benchmark:
         self.plot('hard', 16)
 
 
-#
-Benchmark().plot('easy', 9)
+''' Use Benchamrk().plot_all() to see the graphs.'''
+#Benchmark().plot('easy', 9)
+# Benchmark().plot_all()
 
-''' Use Sudoku().main() to solve all'''
+''' Use Sudoku().main() to solve all problems using a specific solver'''
 # Sudoku(9).main(Solver)  # You wouldn't want to do this!!
 # Sudoku(9).main(Solver) # It would take FOREVER
 
@@ -692,6 +697,7 @@ Benchmark().plot('easy', 9)
 # Sudoku(9).main(Solver3)
 # Sudoku(16).main(Solver3)
 
-# Sudoku(9).solve(Solver, Sudoku(9).easy[1], 'test')
+''' Use Sudoku().solve([solver], [problem], [filename]) to solve one problem.'''
+Sudoku(9).solve(Solver, Sudoku(9).easy[1], 'test')
 # Sudoku(9).solve(Solver2, Sudoku(9).easy[1], 'test')
 # Sudoku(9).solve(Solver3, Sudoku(9).easy[1], 'test')
