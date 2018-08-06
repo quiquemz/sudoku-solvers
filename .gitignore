@@ -1,2 +1,4 @@
 *.cnf
 .DS_STORE
+TodoList.py
+*.pyc
