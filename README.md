@@ -22,3 +22,9 @@ This algorithm should solve the hard puzzles in a few seconds.
 Sudoku Benchmark
 =========
 - Plot producer that shows the the performance difference of the different approaches (with a timeout of 5 minutes or something on the naive algorithm).
+
+Usage
+=========
+
+```terminal
+python main.py
